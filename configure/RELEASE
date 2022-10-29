@@ -1,18 +1,18 @@
 
-APPNAME:=env-template
+APPNAME:=atftp
 
 ## Where the Source repository SRC_URL/SRC_NAME
 #
-SRC_URL:=https://github.com/jeonghanlee
+SRC_URL:=https://github.com/madmartin
 SRC_NAME:=${APPNAME}
 
 
 ## Which the source tag / branch / hash id would like to use
-# 2020-04-21
-SRC_TAG:=master
+# 2022-09-07
+SRC_TAG:=v0.8.0
 
 # Placeholder for the site-specific version control 
-SRC_VERSION:=master
+SRC_VERSION:=0.8.0
 
 
 -include $(TOP)/../RELEASE.local
