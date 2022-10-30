@@ -1,0 +1,44 @@
+---
+name: Rocky8
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignores:
+      - '*.md'
+
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  Rocky8:
+
+    runs-on: ubuntu-latest
+    container: rockylinux/rockylinux:8
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install required packages
+      run: |
+        dnf -y install dnf-plugins-core
+        dnf update -y
+        dnf config-manager --set-enabled powertools
+        dnf update -y
+        dnf -y install "epel-release"
+        dnf update -y
+        dnf install -y git make sudo tree which
+    - name: Configuration
+      run: |
+        make init
+        make vars
+        make conf
+        make conf.systemd
+        make conf.systemd.show
+        make conf.properties
+        make conf.properties.show
+    - name: Build 
+      run: |
+        make conf_install
+        make src_install
+    - name: Environment Check
+      run: make exist
