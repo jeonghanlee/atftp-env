@@ -26,7 +26,7 @@ jobs:
         dnf update -y
         dnf -y install "epel-release"
         dnf update -y
-        dnf install -y git make sudo tree which
+        dnf install -y git make sudo tree which autoconf
     - name: Configuration
       run: |
         make init
