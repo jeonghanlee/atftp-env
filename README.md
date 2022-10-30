@@ -18,7 +18,9 @@ make sd_start
 make sd_status
 ```
 
-
+```
+make reinstall
+```
 
 ```
 make exist
