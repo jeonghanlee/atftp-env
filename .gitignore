@@ -9,3 +9,5 @@ conf.py
 *~
 .DS_Store
 *-src
+atftpd.bash
+atftpd.conf

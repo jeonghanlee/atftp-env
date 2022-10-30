@@ -21,38 +21,17 @@ set -a
 . "${SC_TOP}/@APPNAME@.conf"
 set +a
 
-# Enable core dumps in case the JVM fails
-ulimit -c unlimited
 
-# shutdown_services is not the same as startup_services
-# Order is matter. Please don't change their order.
-startup_service=()
-shutdown_service=()
-service=( @APPNAME_SERVICES@ )
+DAEMON=@INSTALL_LOCATION@/sbin/"${NAME}"
 
-for a_service in "${service[@]}"; do
-    startup_services+="$a_service";
-    shutdown_services+="$a_service";
-done
-
-
-function pushdd { builtin pushd "$@" > /dev/null || exit; }
-function popdd  { builtin popd  > /dev/null || exit; }
-
-function get_ip
-{
-    ip -4 route get 8.8.8.8 | awk \{'print $7'\} | tr -d '\n'
-}
 
 # 1 : installation path : @INSTALL_LOCATION@
-# 2 : Service name : @APPNAME_SERVICES@
 function get_pid
 {
     local  top="$1";shift;
-    local  name="$1";shift;
     local  pid;
-    pid=$(cat "${top}/${name}/temp/${name}.pid")
-    printf "%12s : pid %6d exists.\n" "${name}" "$pid"
+    pid=$(cat "${top}/${PID_FILE}")
+    printf "pid %6d exists.\n" "$pid"
 }
 
 # shellcheck disable=SC2120
@@ -63,15 +42,8 @@ function startup_application
     if [ -z "$top" ]; then
 	    top="${SC_TOP}"
     fi
-
-    # shutdown_services is not the same as startup_services
-    # Order is matter
-    for service in "${startup_services[@]}"; do
-        pushdd "${top}/${service}"
-        rm -rf "temp/${service}.pid"
-        bash bin/startup.sh
-        popdd
-    done
+    
+    "$DAEMON" --daemon --pidfile "$top/$PID_FILE" $OPTIONS
 }
 
 # shellcheck disable=SC2120
@@ -83,184 +55,48 @@ function shutdown_application
 	    top="${SC_TOP}"
     fi
 
-    # shutdown_services is not the same as startup_services
-    # Order is matter
-    for service in "${shutdown_services[@]}"; do
-        pushdd "${top}/${service}"
-        bash bin/shutdown.sh
-        rm -rf "temp/${service}.pid"
-        popdd
-    done  
+    sudo kill -SIGINT $(cat $top/$PID_FILE)
 }
-
-# shellcheck disable=SC2120
-function jsvc_shutdown_application
-{
-    local top="$1";shift;
-
-    if [ -z "$top" ]; then
-	    top="${SC_TOP}"
-    fi
-
-    # Does tomcat user can shutdown all without sudo?
-    for service in "${startup_services[@]}"; do
-        "${JAVA_HOME}"/bin/jsvc -stop -pidfile "${top}/${service}/temp/${service}.pid" org.apache.catalina.startup.Bootstrap
- #      sudo "${JAVA_HOME}"/bin/jsvc -stop -pidfile "${top}/${service}/temp/${service}.pid" org.apache.catalina.startup.Bootstrap
-    done  
-}
-
-# shellcheck disable=SC2120
-function status_application
-{
-
-    local top="$1";shift;
-
-    if [ -z "$top" ]; then
-	    top="${SC_TOP}"
-    fi
-
-    local ip_addr="";
-    ip_addr=$(get_ip);
-
-
-    printf ">------------------------------------------------------------\n"
-    printf ">>> Current Time %s\n" "${SC_TIME}"
-    printf ">------------------------------------------------------------\n"
-    printf ">>> @APPFULLNAME@ Status \n"
-    printf ">------------------------------------------------------------\n"
-    printf "    http://%s:@APPNAME_PVWS_PORT@/pvws \n" "${HOSTNAME}";
-    printf "                        OR\n";
-    printf "    http://%s:@APPNAME_PVWS_PORT@/pvws\n" "${ip_addr}";
-    printf "                         OR\n";
-    printf "    http://%s:@APPNAME_PVWS_PORT@/pvws\n" "localhost";
-    printf ">------------------------------------------------------------\n"
-    printf "\n";
-    printf ">>> Consult Service Logs \n";
-    printf ">------------------------------------------------------------\n"
-    for service in "${startup_services[@]}"; do
-        printf "  tail -f %s/%s/logs/catalina.out\n" "${top}" "${service}";
-    done  
-    printf ">------------------------------------------------------------\n"
-    printf ">>> Service PIDs \n"
-    printf "    All Tomcat processes\n";
-    pgrep 'org.apache.catalina.startup.Bootstrap'
-    printf ">------------------------------------------------------------\n"
-    printf "    @APPNAME_SERVICES@ PIDs\n"
-    for service in "${startup_services[@]}"; do
-        get_pid "${top}" "${service}";
-    done  
-    printf ">------------------------------------------------------------\n"
-    printf "\n";
-}
-
-function @APPNAME@info 
-{
-
-    local arg="$1";shift;
-    local ip_addr="";
-    ip_addr=$(get_ip);
-
-    #The servlet info returns JSON with general server info.
-    #The servlet summary returns JSON with a summary of all active web sockets.
-    #The servlet socket returns JSON with details on all active web sockets and their PVs.
-    #The servlet pool returns JSON with a listing of all PVs in the PV connection pool.
-    
-    local info_url="http://${ip_addr}:@APPNAME_PVWS_PORT@/pvws/info";
-    local summary_url="http://${ip_addr}:@APPNAME_PVWS_PORT@/pvws/summary";
-    local socket_url="http://${ip_addr}:@APPNAME_PVWS_PORT@/pvws/socket";
-    local pool_url="http://${ip_addr}:@APPNAME_PVWS_PORT@/pvws/pool";
-
-    if [ -z "$arg" ]; then
-            arg="info"
-    fi
-
-    case "$arg" in
-        info)
-                curl -s $info_url | json_pp
-            ;;
-        summary)
-                curl -s $summary_url | json_pp
-            ;;
-        socket)
-                curl -s $socket_url | json_pp
-            ;;
-        pool)
-                curl -s $pool_url | json_pp
-            ;;
-        *)
-            printf ">>> info, summary, socket, and pool options are available\n"
-        ;;
-    esac    
-
-}
-
-#function status_storage
-#{
-#    local all=$1; shift;
-#    printf "\n>>>> Storage Status at %s\n\n" "${SC_TIME}";
-#    # ARCHAPPL_STORAGE_TOP is defined in archappl.conf
-#    if [[ $OSTYPE == 'darwin'* ]]; then
-#        sudo du -c -h -a "${ARCHAPPL_STORAGE_TOP}"
-#    else
-#        sudo -E bash -c "du --total --human-readable --time --\"${all}\" \"${ARCHAPPL_STORAGE_TOP}\"";
-#    fi
-#    printf "\n";
-#}
 
 function usage
 {
     {
         echo "";
-        echo "Usage    : $0  args [2nd args]"
+        echo "Usage    : $0  args"
         echo "";
-        echo "               possbile args";
+        echo "           possbile args";
         echo "";
-        echo "               startup   : startup all services in order";
-        echo "               shutdown  : shutdown all services in order ";
-        echo "               restartup : shutdown and startup";
- #       echo "               storage   : show the storage status";
-        echo "               status    : show summary for status"; 
-        echo "               info      : JSON returns (2nd args:info,summary,socket,pool)"
-        echo "               h         : this screen";
+        echo "           start  : start ${NAME}";
+        echo "           stop   : stop ${NAME}";
+        echo "           reload : stop and start ${NAME}";
+        echo "           h      : this screen";
         echo "";
-        echo " bash $0 startup "
-        echo " bash $0 info summary"
+        echo " bash $0 start "
         echo ""
     } 1>&2;
     exit 1;
 }
 
 
+test -f $DAEMON || exit 0
 
 case "$1" in
-    startup)
-	    startup_application
-	    ;;
-    shutdown)
+    start)
+        startup_application
+        ;;
+    stop)
 	    shutdown_application
 	    ;;
-    restart)
-	    startup_application
-	    shutdown_application
-	    ;;
-    status)
-	    status_application
-	    ;;
-#    storage)
-#	    case "$2" in
-#	        all) status_storage "$2" ;;
-#	    *)       status_storage      ;;
-#	    esac
-#	    ;;
-    info)
-        @APPNAME@info "$2"
+    reload)
+        startup_application
+        shutdown_application
         ;;
     h);;
     help)
         usage;
         ;;
     *)
-	    usage;
+        usage;
     ;;
 esac
 

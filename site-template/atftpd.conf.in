@@ -1,0 +1,6 @@
+
+
+NAME=atftpd
+PID_FILE=${NAME}.pid
+
+OPTIONS="--port @TFTPD_PORT@ --user @USERID@ --group @GROUPID@ --tftpd-timeout @TFTPD_TIMEOUT@ --retry-timeout @RETRY_TIMEOUT@ --mcast-port @MCAST_PORT@ --mcast-addr @MCAST_ADDR@ --mcast-ttl @MCAST_TTL@ --maxthread @MAXTHREAD@ --verbose=@TFTPD_VERBOSE@ @TFTPD_DIR@"

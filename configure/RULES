@@ -1,10 +1,9 @@
 
 vpath %.in $(SITE_TEMPLATE_PATH)
-vpath %.xml $(SITE_TEMPLATE_PATH)
-vpath %.properties $(SITE_TEMPLATE_PATH)
+vpath %.in $(SITE_TEMPLATE_PATH)/systemd
 vpath %.local $(TOP)/configure
 vpath %.conf $(SITE_TEMPLATE_PATH)
-vpath usergroup.* $(SITE_TEMPLATE_PATH)
+vpath %.bash $(SITE_TEMPLATE_PATH)
 
 include $(TOP)/configure/RULES_FUNC
 include $(TOP)/configure/RULES_PATCH
