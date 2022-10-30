@@ -1,9 +1,12 @@
 PHONY: install uninstall src_install src_uninstall src_clean conf_install
 
-install: src_install conf_install
-	$(QUIET) chown -R $(USERID):$(GROUPID) $(INSTALL_LOCATION)  
+reinstall: uninstall install
 
-uninstall: src_uninstall
+install: src_install conf_install sd_install sd_enable
+	$(QUIET) $(SUDO) chown -R $(USERID):$(GROUPID) $(INSTALL_LOCATION)  
+
+uninstall: sd_stop sd_disable sd_clean src_uninstall
+	$(QUIET) $(SUDO) systemctl daemon-reload  
 
 clean: src_clean
 
@@ -17,15 +20,15 @@ debugconf:
 endif
 
 conf_install: conf.properties
-	$(QUIET) $(INSTALL) -m 400 -b $(SITE_TEMPLATE_PATH)/$(APPNAME_CONF) $(INSTALL_LOCATION)/  
-	$(QUIET) $(INSTALL) -b $(SITE_TEMPLATE_PATH)/$(APPNAME_MAIN_SCRIPT) $(INSTALL_LOCATION)/  
+	$(QUIET) $(SUDO) $(INSTALL) -m 440 -b $(SITE_TEMPLATE_PATH)/$(APPNAME_CONF) $(INSTALL_LOCATION)/  
+	$(QUIET) $(SUDO) $(INSTALL) -m 550 -b $(SITE_TEMPLATE_PATH)/$(APPNAME_MAIN_SCRIPT) $(INSTALL_LOCATION)/  
 
 src_install:
 	$(QUIET) $(SUDO) make -C $(SRC_PATH) install 
 
 src_uninstall:
-	$(QUIET) make -C $(SRC_PATH) uninstall
-	rm -rf $(INSTALL_LOCATION)
+	$(QUIET) $(SUDO) make -C $(SRC_PATH) uninstall
+	$(SUDO) rm -rf $(INSTALL_LOCATION)
 
 src_clean:
 	$(QUIET) make -C $(SRC_PATH) clean

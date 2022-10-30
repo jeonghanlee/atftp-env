@@ -45,7 +45,7 @@ deinit: distclean
 
 .PHONY: conf build clean conf.show
 
-build: 
+build: conf 
 	$(QUIET) make -C $(SRC_PATH)
 
 clean:

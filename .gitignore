@@ -11,3 +11,6 @@ conf.py
 *-src
 atftpd.bash
 atftpd.conf
+atftp.service
+atftpd.service
+atftpd.socket

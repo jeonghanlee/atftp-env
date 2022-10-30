@@ -1,0 +1,8 @@
+
+.PHONY: run.check run.kill
+
+run.check:
+	$(QUIET)lsof -i:$(TFTPD_PORT) | xargs -I {} echo {}
+
+run.kill:
+	$(QUIET)lsof -i:$(TFTPD_PORT) -t | xargs -I {} kill -9 {}

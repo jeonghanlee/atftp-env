@@ -17,7 +17,7 @@ MCAST_PORT=1758
 MCAST_ADDR=239.239.239.0-255
 MCAST_TTL=1
 MAXTHREAD=100
-TFTPD_VERBOSE=5
+TFTPD_VERBOSE=100
 TFTPD_DIR=/srv/tftp
 
 USERID=nobody
@@ -31,7 +31,6 @@ APPNAME_MAIN_SCRIPT=$(ATFTPD).bash
 SITE_TEMPLATE_PATH=$(TOP)/site-template
 
 SYSTEMD_PATH:=/etc/systemd/system
-SYSTEMD_FILENAME:=${APPNAME}.service
 
 # These allow developers to override the CONFIG_SITE variable
 # settings without having to modify the configure/CONFIG_SITE

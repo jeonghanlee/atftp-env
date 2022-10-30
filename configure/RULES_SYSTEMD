@@ -1,47 +1,83 @@
 #
 #
-.PHONY: sd_config sd_install sd_status sd_start sd_stop sd_restart sd_clean sd_enable sd_disable
+.PHONY: sd_install sd_status sd_start sd_stop sd_restart sd_clean sd_enable sd_disable
 #
 #
-sd_config:
-	$(QUIET)sed -e "s:@TARGET_NAME@:$(APPNAME):g" \
-		-e "s:@JAVA_PATH@:$(JAVA_PATH):g" \
-		-e "s:@USERID@:$(USERID):g"      \
-		-e "s:@GROUPID@:$(GROUPID):g"    \
-		-e "s|@DOCURL@|$(DOCURL)|g"      \
-		-e "s:@INSTALL_LOCATION@:$(INSTALL_LOCATION):g" \
-		< $(SITE_TEMPLATE_PATH)/systemd.service.in > $(SITE_TEMPLATE_PATH)/$(SYSTEMD_FILENAME)
+
+systemd_RULES_NAMES:=systemd0 systemd1
+conf_systemd_RULES:=$(addprefix conf., $(systemd_RULES_NAMES))
+show_systemd_RULES:=$(addsuffix .show, $(conf_systemd_RULES))
+install_systemd_RULES:=$(addprefix install., $(systemd_RULES_NAMES))
+show_install_systemd_RULES:=$(addsuffix .show, $(install_systemd_RULES))
+
+sd_install: conf.systemd install.systemd
+	$(QUIET)sudo systemctl daemon-reload
+
+.PHONY: conf.systemd conf.systemd.show
+
+conf.systemd: $(conf_systemd_RULES)
+
+conf.systemd.show: $(show_systemd_RULES)
+
+install.systemd: $(install_systemd_RULES)
+
+install.systemd.show: $(show_install_systemd_RULES)
+
+conf.systemd0: $(SYSTEMD_FILENAME).in
+	$(QUIET)echo ">>> Generate $(basename $<) from $<"
+	$(QUIET)sed -e "s|@DOCURL@|$(DOCURL)|g" \
+				-e "s|@INSTALL_LOCATION@|$(INSTALL_LOCATION)|g" \
+				-e "s|@APPNAME_CONF@|$(APPNAME_CONF)|g" \
+                < $< > $(basename $<)
+
+conf.systemd0.show: $(SYSTEMD_FILENAME).in
+	@cat -b $(basename $<)
+
+install.systemd0: $(SYSTEMD_FILENAME).in
+	$(QUIET)sudo $(INSTALL_DATA) -b $(basename $<) $(SYSTEMD_PATH)/
+
+install.systemd0.show:
+	$(QUIET)cat -b $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)
 #
-#	
-sd_install: sd_config
-	$(QUIET)$(SUDO) $(INSTALL_DATA) -b $(SITE_TEMPLATE_PATH)/$(SYSTEMD_FILENAME) $(SYSTEMD_PATH)/
-	$(QUIET)$(SUDO) systemctl daemon-reload
-#
+conf.systemd1: $(SYSTEMD_SOCKET).in
+	$(QUIET)echo ">>> Generate $(basename $<) from $<"
+	$(QUIET)sed -e "s|@TFTPD_PORT@|$(TFTPD_PORT)|g" \
+                < $< > $(basename $<)
+
+conf.systemd1.show: $(SYSTEMD_SOCKET).in
+	@cat -b $(basename $<)
+
+install.systemd1: $(SYSTEMD_SOCKET).in
+	$(QUIET)$(SUDO) $(INSTALL_DATA) -b $(basename $<) $(SYSTEMD_PATH)/
+
+install.systemd1.show:
+	$(QUIET)cat -b $(SYSTEMD_PATH)/$(SYSTEMD_SOCKET)
 #	
 sd_status:
 	$(QUIET) systemctl status -l $(SYSTEMD_FILENAME) | cat -b
 #
 #
 sd_start:
-	$(QUIET)$(SUDO) systemctl start $(SYSTEMD_FILENAME)
+	$(QUIET)sudo systemctl start $(SYSTEMD_FILENAME)
 #
 # We ignore its error
 sd_stop:
-	-$(QUIET)$(SUDO) systemctl stop $(SYSTEMD_FILENAME)
+	-$(QUIET)sudo systemctl stop $(SYSTEMD_FILENAME)
 #
 #
 sd_restart:
-	$(QUIET)$(SUDO) systemctl restart $(SYSTEMD_FILENAME)
+	$(QUIET)sudo systemctl restart $(SYSTEMD_FILENAME)
 #
 # We ignore its error
 sd_clean:
-	$(if $(wildcard $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)), $(QUIET)$(SUDO) rm -f $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME))
+	$(if $(wildcard $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)), $(QUIET)sudo rm -f $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME))
+	$(if $(wildcard $(SYSTEMD_PATH)/$(SYSTEMD_SOCKET)), $(QUIET)sudo rm -f $(SYSTEMD_PATH)/$(SYSTEMD_SOCKET))
 #
 #
 sd_enable:
-	$(if $(wildcard $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)), $(SUDO) systemctl enable $(SYSTEMD_FILENAME))
+	$(if $(wildcard $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)), sudo systemctl enable $(SYSTEMD_FILENAME))
 #
 #
 sd_disable:
-	$(if $(wildcard $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)), $(SUDO) systemctl disable $(SYSTEMD_FILENAME))
+	$(if $(wildcard $(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)), sudo systemctl disable $(SYSTEMD_FILENAME))
 #
