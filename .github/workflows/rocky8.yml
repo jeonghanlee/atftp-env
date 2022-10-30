@@ -38,7 +38,7 @@ jobs:
         make conf.properties.show
     - name: Build 
       run: |
-        make conf_install
         make src_install
+        make conf_install
     - name: Environment Check
       run: make exist
