@@ -1,5 +1,7 @@
 # atfpd-env
 
+[![Rocky8](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky8.yml/badge.svg)](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky8.yml)
+
 Configuration Environment for the Advanced TFTP service at <https://github.com/madmartin/atftp>. This repository is designed for specifically the Rocky Linux, because Redhat variant does not have the atftp package as `rpm` format. Please use the Debian package if one wants to use it within Debian variants.
 
 ## Rocky 8
