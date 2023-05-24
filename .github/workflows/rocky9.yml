@@ -22,8 +22,6 @@ jobs:
       run: |
         dnf -y install dnf-plugins-core
         dnf update -y
-        dnf config-manager --set-enabled powertools
-        dnf update -y
         dnf -y install "epel-release"
         dnf update -y
         dnf install -y git make sudo tree which automake gcc gcc-c++ glibc-devel libtool flex binutils strace
