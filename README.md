@@ -1,48 +1,24 @@
-# atfpd-env
+# atftp-env
 
-[![Rocky8](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky8.yml/badge.svg)](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky8.yml)
-[![Rocky9](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky9.yml/badge.svg)](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky9.yml)
+[![Rocky8.10](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky8.yml/badge.svg)](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky8.yml)
+[![Rocky10.2](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky10.yml/badge.svg)](https://github.com/jeonghanlee/atftp-env/actions/workflows/rocky10.yml)
 
-Configuration Environment for the Advanced TFTP service at <https://github.com/madmartin/atftp>. This repository is designed for specifically the Rocky Linux, because Redhat variant does not have the atftp package as a `rpm` format. Please use the Debian package if one wants to use it within Debian variants and one **should not** use this repository on Debian variants.
+Build and service configuration for Advanced TFTP 0.8.1 on Rocky Linux 8.10 and 10.2. The service provides downloads only. On Debian variants, use the distribution's atftp package.
 
-## Rocky Linux (8, 9)
+- [Installation](docs/INSTALL.md)
+- [Operating scenarios](docs/USER_GUIDE.md)
+- [Verification procedures](tests/README.md)
+- [Host acceptance](gate/RUNBOOK.md)
+- [Documentation index](docs/README.md)
 
-### Setup and Install Commands
+## Installation and operation
 
-```bash
-make init
-make conf
-make build
-make install
-make exist
-```
+Follow the [installation procedure](docs/INSTALL.md) for packages, service identity, directories, permissions, and installation checks. Run Make as the checkout owner with sudo access; recipes invoke sudo internally.
 
-### Systemd related Commands
+Installation enables `atftpd.socket` at boot and leaves it stopped. An active socket with an inactive server is normal between requests. Use the [operator scenarios](docs/USER_GUIDE.md) for publication, service control, updates, reboot checks, and recovery.
 
-```
-make sd_start
-make sd_status
-make sd_stop
-```
+## Verification and acceptance
 
-### Uninstall, or reinstall with systemd services
+The [test procedures](tests/README.md) distinguish installed-state checks, isolated lifecycle tests, and downloads from actual network clients. The [host acceptance runbook](gate/RUNBOOK.md) defines the ordered deployment checks and evidence requirements.
 
-```
-make uninstall
-make reinstall
-```
-
-### Check target location
-
-```
-make exist
-tree -aL 1 /opt/atftp
-/opt/atftp
-├── atftpd.bash
-├── atftpd.conf
-├── bin
-├── sbin
-└── share
-
-```
-
+CI builds each supported Rocky image, installs the programs and units, and runs real systemd in a privileged disposable container. It verifies socket activation, actual server UID/GID, download contents, upload and overwrite rejection, and stop/start behavior. Deployment firewall, SELinux, OS reboot, and device behavior require host acceptance.
