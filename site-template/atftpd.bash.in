@@ -1,102 +1,36 @@
-#!/usr/bin/env bash
-#
-#  author  : Jeong Han Lee
-#  email   : jeonghan.lee@gmail.com
-#  version : 0.0.3
+#!/bin/bash -p
 
+set -euo pipefail
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+unset BASH_ENV ENV
+umask 022
 
-declare -g SC_RPATH;
-#declare -g SC_NAME;
-declare -g SC_TOP;
-declare -g SC_TIME;
+readonly SERVICE=@SYSTEMD_FILENAME@
+readonly SOCKET=@SYSTEMD_SOCKET@
+declare -a SYSTEMCTL=(systemctl)
+if (( EUID != 0 )); then
+    SYSTEMCTL=(sudo systemctl)
+fi
 
-SC_RPATH="$(realpath "$0")";
-#SC_NAME=${0##*/};
-SC_TOP="${SC_RPATH%/*}"
-SC_TIME="$(date +%y%m%d%H%M)"
-
-
-set -a
-# shellcheck disable=SC1091,SC1090
-. "${SC_TOP}/@APPNAME@.conf"
-set +a
-
-
-DAEMON=@INSTALL_LOCATION@/sbin/"${NAME}"
-
-
-# 1 : installation path : @INSTALL_LOCATION@
-function get_pid
-{
-    local  top="$1";shift;
-    local  pid;
-    pid=$(cat "${top}/${PID_FILE}")
-    printf "pid %6d exists.\n" "$pid"
-}
-
-# shellcheck disable=SC2120
-function startup_application
-{
-    local top="$1";shift;
-
-    if [ -z "$top" ]; then
-	    top="${SC_TOP}"
-    fi
-    
-    "$DAEMON" --daemon --pidfile "$top/$PID_FILE" $OPTIONS
-}
-
-# shellcheck disable=SC2120
-function shutdown_application
-{
-    local top="$1";shift;
-
-    if [ -z "$top" ]; then
-	    top="${SC_TOP}"
-    fi
-
-    sudo kill -SIGINT $(cat $top/$PID_FILE)
-}
-
-function usage
-{
-    {
-        echo "";
-        echo "Usage    : $0  args"
-        echo "";
-        echo "           possbile args";
-        echo "";
-        echo "           start  : start ${NAME}";
-        echo "           stop   : stop ${NAME}";
-        echo "           reload : stop and start ${NAME}";
-        echo "           h      : this screen";
-        echo "";
-        echo " bash $0 start "
-        echo ""
-    } 1>&2;
-    exit 1;
-}
-
-
-test -f $DAEMON || exit 0
-
-case "$1" in
+case "${1:-help}" in
     start)
-        startup_application
+        "${SYSTEMCTL[@]}" start "$SOCKET"
         ;;
     stop)
-	    shutdown_application
-	    ;;
-    reload)
-        startup_application
-        shutdown_application
+        "${SYSTEMCTL[@]}" stop "$SOCKET" "$SERVICE"
         ;;
-    h);;
-    help)
-        usage;
+    restart|reload)
+        "${SYSTEMCTL[@]}" stop "$SOCKET" "$SERVICE"
+        "${SYSTEMCTL[@]}" start "$SOCKET"
+        ;;
+    status)
+        exec systemctl status "$SOCKET" "$SERVICE"
+        ;;
+    h|help|--help)
+        printf 'Usage: %s {start|stop|restart|reload|status}\n' "$0"
         ;;
     *)
-        usage;
-    ;;
+        printf 'Unknown command: %s\n' "$1" >&2
+        exit 2
+        ;;
 esac
-

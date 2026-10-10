@@ -1,0 +1,9 @@
+.git
+work
+*-src
+**/atftpd.conf
+**/atftpd.bash
+**/atftpd.service
+**/atftpd.socket
+**/*.local
+__pycache__

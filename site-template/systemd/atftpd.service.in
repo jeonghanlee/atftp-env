@@ -1,18 +1,22 @@
 [Unit]
-Description=Advanced TFTP Server 
+Description=Advanced TFTP Server
 Documentation=@DOCURL@
 
 After=network.target atftpd.socket
 Requires=atftpd.socket
+RequiresMountsFor=@TFTPD_DIR@
 
 
 [Service]
-#
+Type=simple
+User=@USERID@
+Group=@GROUPID@
 EnvironmentFile=@INSTALL_LOCATION@/@APPNAME_CONF@
 ExecStart=@INSTALL_LOCATION@/sbin/atftpd $OPTIONS
 StandardInput=socket
-#
-
-[Install]
-WantedBy = multi-user.target
-
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadOnlyPaths=@TFTPD_DIR@
+UMask=0022

@@ -1,0 +1,32 @@
+---
+name: Rocky10.2
+
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - '*.md'
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and install
+        run: docker build --file .github/ci/Dockerfile --build-arg ROCKY_VERSION=10.2 --tag atftp-ci .
+      - name: Start systemd
+        run: >-
+          docker run --detach --privileged --cgroupns=private
+          --tmpfs /run --tmpfs /run/lock --name atftp-ci atftp-ci
+      - name: Verify service
+        run: docker exec atftp-ci /src/tests/service.bash
+      - name: Verify installation failure handling
+        run: docker exec atftp-ci /src/tests/installation.bash
+      - name: Remove test container
+        if: always()
+        run: docker rm --force atftp-ci

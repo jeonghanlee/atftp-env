@@ -12,7 +12,8 @@ conf.properties.show: $(show_properties_RULES)
 conf.mainscript: $(APPNAME_MAIN_SCRIPT).in
 	$(QUIET) echo ">>> Generate output, $(basename $<) from $<"
 	$(QUIET)sed -e "s:@INSTALL_LOCATION@:$(INSTALL_LOCATION):g" \
-			    -e "s|@APPNAME@|$(ATFTPD)|g" \
+			    -e "s|@SYSTEMD_FILENAME@|$(SYSTEMD_FILENAME)|g" \
+			    -e "s|@SYSTEMD_SOCKET@|$(SYSTEMD_SOCKET)|g" \
                 < $< > $(basename $<)
 	
 conf.mainscript.show: $(APPNAME_MAIN_SCRIPT).in
@@ -21,18 +22,7 @@ conf.mainscript.show: $(APPNAME_MAIN_SCRIPT).in
 
 conf.atftpd: $(APPNAME_CONF).in 
 	$(QUIET) echo ">>> Generate $(basename $<) from $<"
-	$(QUIET)sed -e "s:@INSTALL_LOCATION@:$(INSTALL_LOCATION):g" \
-			 -e "s|@TFTPD_TIMEOUT@|$(TFTPD_TIMEOUT)|g" \
-			 -e "s|@TFTPD_PORT@|$(TFTPD_PORT)|g" \
-			 -e "s|@RETRY_TIMEOUT@|$(RETRY_TIMEOUT)|g" \
-			 -e "s|@MCAST_PORT@|$(MCAST_PORT)|g" \
-			 -e "s|@MCAST_ADDR@|$(MCAST_ADDR)|g" \
-			 -e "s|@MCAST_TTL@|$(MCAST_TTL)|g" \
-			 -e "s|@MAXTHREAD@|$(MAXTHREAD)|g" \
-			 -e "s|@TFTPD_VERBOSE@|$(TFTPD_VERBOSE)|g" \
-			 -e "s|@USERID@|$(USERID)|g" \
-			 -e "s|@GROUPID@|$(GROUPID)|g" \
-			 -e "s|@TFTPD_DIR@|$(TFTPD_DIR)|g" \
+	$(QUIET)sed -e "s|@TFTPD_OPTIONS@|$(TFTPD_OPTIONS)|g" \
 			< $< > $(basename $<)
 
 conf.atftpd.show: $(APPNAME_CONF).in 

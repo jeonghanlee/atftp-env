@@ -12,6 +12,7 @@ INSTALL_LOCATION=$(INSTALL_PATH)/$(APPNAME)
 
 TFTPD_TIMEOUT=300
 TFTPD_PORT=69
+TFTPD_ADDRESS=0.0.0.0
 RETRY_TIMEOUT=5
 MCAST_PORT=1758
 MCAST_ADDR=239.239.239.0-255
@@ -19,9 +20,11 @@ MCAST_TTL=1
 MAXTHREAD=100
 TFTPD_VERBOSE=100
 TFTPD_DIR=/srv/tftp
+TFTPD_DIR_MODE=0755
+TFTPD_OPTIONS=--tftpd-timeout $(TFTPD_TIMEOUT) --retry-timeout $(RETRY_TIMEOUT) --mcast-port $(MCAST_PORT) --mcast-addr $(MCAST_ADDR) --mcast-ttl $(MCAST_TTL) --maxthread $(MAXTHREAD) --verbose=$(TFTPD_VERBOSE) $(TFTPD_DIR)
 
-USERID=nobody
-GROUPID=alstestlab
+USERID=atftp
+GROUPID=atftp
 
 ATFTPD=$(APPNAME)d
 
@@ -31,6 +34,7 @@ APPNAME_MAIN_SCRIPT=$(ATFTPD).bash
 SITE_TEMPLATE_PATH=$(TOP)/site-template
 
 SYSTEMD_PATH:=/etc/systemd/system
+SYSTEMD_RELOAD=1
 
 # These allow developers to override the CONFIG_SITE variable
 # settings without having to modify the configure/CONFIG_SITE

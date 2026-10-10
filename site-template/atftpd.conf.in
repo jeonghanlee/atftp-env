@@ -1,6 +1,2 @@
-NAME=atftpd
-PID_FILE=${NAME}.pid
-
-USE_INETD=false
-
-OPTIONS="--port @TFTPD_PORT@ --user @USERID@ --group @GROUPID@ --tftpd-timeout @TFTPD_TIMEOUT@ --retry-timeout @RETRY_TIMEOUT@ --mcast-port @MCAST_PORT@ --mcast-addr @MCAST_ADDR@ --mcast-ttl @MCAST_TTL@ --maxthread @MAXTHREAD@ --verbose=@TFTPD_VERBOSE@ @TFTPD_DIR@"
+# The systemd socket and service units own the endpoint and identity.
+OPTIONS="@TFTPD_OPTIONS@"

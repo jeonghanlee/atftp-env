@@ -1,11 +1,11 @@
 [Unit]
-Description=Advanced tftp Server Activation Socket
+Description=Advanced TFTP Server Activation Socket
 
 
-# since systemd socket binds to 0.0.0.0
 [Socket]
-ListenDatagram=0.0.0.0:@TFTPD_PORT@
+ListenDatagram=@TFTPD_ADDRESS@:@TFTPD_PORT@
+Accept=no
+Service=@SYSTEMD_FILENAME@
 
 [Install]
 WantedBy=sockets.target
-

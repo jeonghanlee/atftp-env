@@ -1,12 +1,36 @@
-PHONY: install uninstall src_install src_uninstall src_clean conf_install
+.PHONY: install uninstall reinstall src_install src_uninstall src_clean conf_install service.setup service.check
 
 reinstall: uninstall install
 
-install: src_install conf_install sd_install sd_enable
-	$(QUIET) $(SUDO) chown -R $(USERID):$(GROUPID) $(INSTALL_LOCATION)  
+install: service.setup src_install conf_install sd_install sd_reload sd_enable
+	$(QUIET)printf '%s\n' 'Installed. Start the socket with: make sd_start'
 
-uninstall: sd_stop sd_disable sd_clean src_uninstall
-	$(QUIET) $(SUDO) systemctl daemon-reload  
+## Create the service account and prepare the TFTP directory
+service.setup:
+	$(QUIET)getent group "$(GROUPID)" >/dev/null || $(SUDO) groupadd --system "$(GROUPID)"
+	$(QUIET)getent passwd "$(USERID)" >/dev/null || $(SUDO) useradd --system --gid "$(GROUPID)" --home-dir "$(TFTPD_DIR)" --no-create-home --shell /sbin/nologin "$(USERID)"
+	$(QUIET)test "$$(id -u "$(USERID)")" -ne 0
+	$(QUIET)test "$$(getent group "$(GROUPID)" | cut -d: -f3)" -ne 0
+	$(QUIET)test ! -L "$(TFTPD_DIR)"
+	$(QUIET)$(SUDO) $(INSTALL) -d -o root -g "$(GROUPID)" -m "$(TFTPD_DIR_MODE)" "$(TFTPD_DIR)"
+
+## Verify the installed account, ownership, directory policy, and systemd units
+service.check:
+	$(QUIET)test "$$(id -u "$(USERID)")" -ne 0
+	$(QUIET)test "$$(getent group "$(GROUPID)" | cut -d: -f3)" -ne 0
+	$(QUIET)test "$$(stat -c '%U:%G' "$(TFTPD_DIR)")" = "root:$(GROUPID)"
+	$(QUIET)test "$$(stat -c '%a' "$(TFTPD_DIR)")" = "$(patsubst 0%,%,$(TFTPD_DIR_MODE))"
+	$(QUIET)test -z "$$(find "$(INSTALL_LOCATION)" -xdev \( ! -user root -o ! -group root \) -print -quit)"
+	$(QUIET)test -z "$$(find "$(INSTALL_LOCATION)" -xdev ! -type l -perm /022 -print -quit)"
+	$(QUIET)test -x "$(INSTALL_LOCATION)/bin/atftp"
+	$(QUIET)test -x "$(INSTALL_LOCATION)/sbin/atftpd"
+	$(QUIET)test -r "$(INSTALL_LOCATION)/$(APPNAME_CONF)"
+	$(QUIET)systemd-analyze verify "$(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)" "$(SYSTEMD_PATH)/$(SYSTEMD_SOCKET)"
+	$(QUIET)$(SUDO) /bin/bash -p ./bin/check-service.bash "$(SYSTEMD_PATH)/$(SYSTEMD_FILENAME)" "$(SYSTEMD_PATH)/$(SYSTEMD_SOCKET)" "$(USERID)" "$(GROUPID)" "$(TFTPD_DIR)" "$(INSTALL_LOCATION)" "$(APPNAME_CONF)" "$(TFTPD_ADDRESS):$(TFTPD_PORT)" "$(SYSTEMD_RELOAD)" "$(TFTPD_OPTIONS)"
+	$(QUIET)systemctl is-enabled "$(SYSTEMD_SOCKET)"
+	$(QUIET)printf '%s\n' 'PASS: installed service configuration'
+
+uninstall: sd_stop sd_disable sd_clean src_uninstall sd_reload
 
 clean: src_clean
 
@@ -20,11 +44,12 @@ debugconf:
 endif
 
 conf_install: conf.properties
-	$(QUIET) $(SUDO) $(INSTALL) -m 440 -b $(SITE_TEMPLATE_PATH)/$(APPNAME_CONF) $(INSTALL_LOCATION)/  
-	$(QUIET) $(SUDO) $(INSTALL) -m 550 -b $(SITE_TEMPLATE_PATH)/$(APPNAME_MAIN_SCRIPT) $(INSTALL_LOCATION)/  
+	$(QUIET) $(SUDO) $(INSTALL) -o root -g root -m 644 -b $(SITE_TEMPLATE_PATH)/$(APPNAME_CONF) $(INSTALL_LOCATION)/
+	$(QUIET) $(SUDO) $(INSTALL) -o root -g root -m 755 -b $(SITE_TEMPLATE_PATH)/$(APPNAME_MAIN_SCRIPT) $(INSTALL_LOCATION)/
 
 src_install:
 	$(QUIET) $(SUDO) make -C $(SRC_PATH) install 
+	$(QUIET) $(SUDO) chown -R root:root "$(INSTALL_LOCATION)"
 
 src_uninstall:
 	$(QUIET) $(SUDO) make -C $(SRC_PATH) uninstall
@@ -48,4 +73,3 @@ src_version_clean:
 
 
 FORCE:
-

@@ -1,5 +1,3 @@
 # Linux Systemd
-SYSTEMD_PATH:=/etc/systemd/system
 SYSTEMD_FILENAME:=$(ATFTPD).service
 SYSTEMD_SOCKET:=$(ATFTPD).socket
-
