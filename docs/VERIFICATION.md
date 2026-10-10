@@ -1,6 +1,6 @@
 # TFTP verification procedures
 
-Tests distinguish installed configuration, real service behavior, and client-network acceptance.
+Select checks for installed configuration, real service behavior, and client-network acceptance. Follow the [operator workflow](index.md) for the complete installation and operating order.
 
 ## Test classification and scope
 
@@ -12,13 +12,13 @@ Tests distinguish installed configuration, real service behavior, and client-net
 | `tests/client.bash` | Exact bytes from a published file through the installed client | Server or actual network client, ordinary user | Temporary client download; the request can activate an idle server |
 | `bash tests/network.bash` | Peer downloads, PUT rejection, idle activation, stop/start/restart, and container restart | Docker host with privileged-container support | Builds two images; creates and removes two containers and one network; retains images and logs |
 
-The lifecycle suite executes the installed programs and real systemd units. It uses the shipped fixture in `fixtures/download.txt`. It must not run against an operational service: it interrupts transfers and publishes a world-writable overwrite probe.
+The lifecycle suite executes the installed programs and real systemd units. It uses the shipped fixture in `tests/fixtures/download.txt`. It must not run against an operational service: it interrupts transfers and publishes a world-writable overwrite probe.
 
 The client check sends only a download request and does not change server files. With an active systemd socket, the request can activate an idle server. Checks and tests use Bash 4.4 or later, coreutils, gawk, and diffutils. Client download checks also require an installed atftp client. The isolated suites use `lib.bash` for assertions and bounded execution; they run the installed Make targets, systemd units, and TFTP programs directly.
 
 ## Run verification in order
 
-1. Complete the [installation procedure](../docs/INSTALL.md).
+1. Complete the [installation procedure](INSTALL.md). Run server-side commands from the retained repository root.
 2. Run `make service.check`; stop on any failed check.
 3. On a dedicated systemd test host, run the lifecycle suite:
 
@@ -36,17 +36,17 @@ The client check sends only a download request and does not change server files.
 
    Require exit status zero and the final `PASS` line. This suite requires the default account, unit names, and paths; never run it on an operational service. It resets systemd failure and start-limit counters between independent activation cases.
 
-5. Complete the [host acceptance procedure](../gate/RUNBOOK.md), including the real client network.
+5. On the intended deployment host, complete [host acceptance](ACCEPTANCE.md), including the real client network. Isolated test results cannot replace deployment acceptance.
 
 ## Check a published download
 
-On the client, retain an independently approved copy of the published file and run:
+On the client, use Bash 4.4 or later, coreutils, diffutils, and an installed atftp client. From the client's test checkout root, use an independently approved copy of the published file:
 
 ```bash
 ./tests/client.bash --host <server_ip> --remote <published_file> --expected <approved_file>
 ```
 
-Replace `<server_ip>` with the server address, `<published_file>` with its relative TFTP path, and `<approved_file>` with the local approved copy. Use `--client` for another installed client path and `--port` for a non-default port.
+Replace `<server_ip>` with the server address, `<published_file>` with its relative TFTP path, and `<approved_file>` with the local approved copy. The default client is `/opt/atftp/bin/atftp` and the default UDP port is 69. Use `--client` for another installed client path and `--port` for a non-default port.
 
 Require exit status zero and `[PASS] download content matches`. A failed client command, timeout, missing output, or content mismatch exits nonzero. The check prints the byte count and SHA-256 digest of the matching content.
 

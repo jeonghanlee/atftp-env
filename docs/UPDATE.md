@@ -1,6 +1,6 @@
 # Update the TFTP programs
 
-Replace the installed programs while retaining an approved recovery copy of the source identity and configuration.
+Replace the installed programs while retaining an approved recovery copy of the source identity and configuration. Use this procedure for the update scenario in the [service lifecycle](USER_GUIDE.md).
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@ Replace the installed programs while retaining an approved recovery copy of the 
 - The checkout owner runs these steps from the `atftp-env` repository root.
 - These commands use the default source and installation paths. Replace them with the recorded site paths when overrides apply.
 - A unique backup identifier and sufficient private backup storage outside the published directory.
-- An approved client file for the final [download check](../tests/README.md).
+- An approved client file for the final [download check](VERIFICATION.md).
 
 ## Apply the selected source version
 
@@ -100,4 +100,4 @@ Replace the installed programs while retaining an approved recovery copy of the 
 
 ## Verification
 
-From the approved client network, execute the [download check](../tests/README.md) using the approved file. Require exit status zero and an exact content match before returning the service to operation. Retain the backup until the update is accepted.
+From the approved client network, execute the [download check](VERIFICATION.md) using the approved file. Require exit status zero and an exact content match before returning the service to operation. Retain the backup until the update is accepted.

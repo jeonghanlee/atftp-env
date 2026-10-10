@@ -4,8 +4,9 @@ Establish that an installed download-only service operates on its intended host 
 
 ## Prerequisites
 
-- A completed [installation](../docs/INSTALL.md) on Rocky Linux 8.10 or 10.2.
+- A completed [installation](INSTALL.md) on Rocky Linux 8.10 or 10.2.
 - Sudo access on the server, an approved interruption window, and an actual network client.
+- Server commands run from the retained repository root with installed site settings; client commands run from the client's test checkout root.
 - Approved firewall rules for the complete TFTP exchange and applicable SELinux policy and file contexts.
 - Bash 4.4 or later, coreutils, diffutils for `cmp`, the test checkout, and an installed atftp client on the client host.
 - An independently approved test file available on both hosts.
@@ -40,9 +41,9 @@ Establish that an installed download-only service operates on its intended host 
    ./tests/client.bash --host <server_ip> --remote validation.txt --expected tests/fixtures/download.txt
    ```
 
-   Replace `<server_ip>` with the deployment address. Require an exact content match. The same command from the server is only a local check.
+   Replace `<server_ip>` with the deployment address. The example uses `/opt/atftp/bin/atftp` and UDP port 69; use the [client check options](VERIFICATION.md#check-a-published-download) for another client path or port. Require an exact content match. The same command from the server is only a local check.
 
-7. During the approved window, exercise maintenance stop, resume, and restart using the [operator scenarios](../docs/USER_GUIDE.md). Require both units inactive after stop and a successful client check after resume and restart.
+7. During the approved window, exercise maintenance stop, resume, and restart using the [operator scenarios](USER_GUIDE.md). Require both units inactive after stop and a successful client check after resume and restart.
 8. Exercise an actual OS reboot. Require socket boot activation and repeat the client download afterward.
 9. If device firmware loading is part of deployment, run the actual device procedure using its approved file and verify the device's resulting version or ready state. A desktop client download cannot substitute for this check.
 

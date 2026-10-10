@@ -1,6 +1,6 @@
 # Restore the approved TFTP installation
 
-Rebuild the recorded source commit with the preserved configuration when an update fails acceptance.
+Rebuild the recorded source commit with the preserved configuration when an update fails acceptance. This procedure supplies the recovery scenario in the [service lifecycle](USER_GUIDE.md).
 
 ## Prerequisites
 
@@ -83,4 +83,4 @@ Rebuild the recorded source commit with the preserved configuration when an upda
 
 ## Verification
 
-From the approved client network, execute the [download check](../tests/README.md) against an independently approved file. Require an exact content match before admitting operational clients. Program recovery retains published data; restore damaged data separately from its approved copy before this check.
+From the approved client network, execute the [download check](VERIFICATION.md) against an independently approved file. Require an exact content match before admitting operational clients. Program recovery retains published data; restore damaged data separately from its approved copy before this check.

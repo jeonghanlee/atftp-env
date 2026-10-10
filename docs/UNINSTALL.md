@@ -5,7 +5,10 @@ Remove installed programs and service units while preserving published data and 
 ## Prerequisites
 
 - Sudo access and the checkout used for installation, including its site overrides and upstream build tree.
+- Commands run from that repository root.
 - An approved interruption window and retained configuration and published files.
+- Independently retained approved copies of published files for content comparison.
+- The checks below use default paths, unit names, and accounts; substitute the recorded site values for a custom installation.
 
 ## Remove the installed service
 
@@ -25,4 +28,41 @@ Remove installed programs and service units while preserving published data and 
 
 ## Verification
 
-Confirm that both units are absent from systemd and the program installation is absent. Compare retained published files with their approved copies and confirm that the service account remains present. A failed removal is incomplete; do not report the service as removed until all required checks succeed.
+Check that systemd cannot load either removed unit:
+
+```bash
+test "$(systemctl show atftpd.socket --property=LoadState --value)" = not-found
+test "$(systemctl show atftpd.service --property=LoadState --value)" = not-found
+```
+
+Require exit status zero from each assertion. `not-found` is the expected load state after removal; `inactive` alone does not prove removal.
+
+Check that the unit files and program installation are absent:
+
+```bash
+test ! -e /etc/systemd/system/atftpd.socket
+test ! -e /etc/systemd/system/atftpd.service
+test ! -e /opt/atftp
+```
+
+Require exit status zero from each command and no output.
+
+Check that the published directory and service identity remain:
+
+```bash
+test -d /srv/tftp
+getent passwd atftp
+getent group atftp
+```
+
+Require exit status zero from every command. The account queries print the retained user and group entries.
+
+Compare each retained published file with its independently approved copy:
+
+```bash
+cmp -- /srv/tftp/<published_file> <approved_file>
+```
+
+Replace `<published_file>` with the relative published path and `<approved_file>` with its approved local copy. Require exit status zero and no output for every file.
+
+A failed check leaves removal acceptance incomplete. Do not require a successful TFTP download after removal.

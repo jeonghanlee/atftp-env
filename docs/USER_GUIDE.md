@@ -4,9 +4,10 @@ Manage published files and the socket-activated server through the installed Mak
 
 ## Prerequisites
 
-- A completed [installation](INSTALL.md) and [host acceptance](../gate/RUNBOOK.md).
+- A completed [installation](INSTALL.md).
+- Completed [host acceptance](ACCEPTANCE.md) before admitting operational clients. During acceptance, exercise the same scenarios within its approved interruption window.
 - Sudo access for service control and publication.
-- A retained checkout with the same site configuration as the installed service.
+- Commands run from the retained repository root with the same site configuration as the installed service.
 - A known client and expected file for download verification.
 
 ## Follow the operating procedure
@@ -32,18 +33,26 @@ Manage published files and the socket-activated server through the installed Mak
    sudo install -o root -g root -m 644 firmware.bin /srv/tftp/firmware.bin
    ```
 
-   Use regular files and readable parent directories. Do not publish links outside the TFTP directory. Uploads and overwrites through TFTP are prohibited.
+   Apply the [directory access rules](PERMISSIONS.md). Use regular files and readable parent directories; do not publish links outside the TFTP directory. TFTP uploads and overwrites are prohibited.
 
-3. Inspect both unit states after the action:
+3. For scenarios that retain the installed service, inspect both unit states after the action:
 
    ```bash
    make sd_status
    ```
 
-   An active socket with an inactive server is normal between requests. The server exits after the configured idle timeout. `sd_status` can return nonzero for that normal state; read each unit's state. If a required check fails, keep clients out of service until the approved configuration and content pass again.
+   Interpret socket and server states using [monitoring boundaries](MONITORING.md). `sd_status` can return nonzero when the server is idle; read each unit's state. If a required check fails, keep clients out of service until the approved configuration and content pass again.
+
+   For service removal, use the [removal verification](UNINSTALL.md#verification) instead. Removed units are expected to be absent.
 
 ## Verification
 
-From an actual client on an approved network, execute the [download check](../tests/README.md). Require exit status zero and an exact content match after every publication, replacement, restart, reboot, or update.
+Select the verification that matches the scenario:
+
+| Scenario | Required verification |
+| --- | --- |
+| Initial start, publication, replacement, restart, resume, reboot, update, or recovery | From an actual client on an approved network, run the [download check](VERIFICATION.md). Require exit status zero and an exact content match. |
+| Maintenance stop | Require both socket and service states to be `inactive`. Download success is not expected while stopped. |
+| Service removal | Complete the [removal verification](UNINSTALL.md#verification). Require absent units and programs, retained data, and retained service identity. |
 
 A same-host download checks local operation. It does not establish reachability from the client network. A reboot scenario requires an actual OS reboot; restarting a unit cannot substitute for it.

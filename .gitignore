@@ -14,3 +14,4 @@ atftpd.conf
 atftp.service
 atftpd.service
 atftpd.socket
+/book/

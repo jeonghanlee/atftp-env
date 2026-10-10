@@ -1,0 +1,13 @@
+[book]
+title = "TFTP operator manual"
+description = "Install, verify, and operate atftp on Rocky Linux 8.10 and 10.2."
+language = "en"
+src = "docs"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/jeonghanlee/atftp-env"
+edit-url-template = "https://github.com/jeonghanlee/atftp-env/edit/master/docs/{path}"

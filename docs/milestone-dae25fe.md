@@ -7,9 +7,9 @@ Canonical branch or ref: master
 Git upstream: origin/master
 Remote tracker: none
 
-Next session entry point: `docs/milestone-dae25fe.md`, M2; finish baseline commit preparation before implementing the proposed monitoring and permission changes.
+Next session entry point: `docs/milestone-dae25fe.md`, M3; review the published-directory policy before implementation. M4 and M5 remain separate design and measurement-plan work.
 
-This document separates implemented behavior, observed verification, and proposed work. The baseline changes remain uncommitted. Container results do not establish production-host acceptance or concurrent-device capacity.
+This document separates implemented behavior, observed verification, and proposed work. The baseline is recorded in commits d1a4981, 6db0cc8, and b1f4d13. Container results do not establish production-host acceptance or concurrent-device capacity.
 
 ## Milestone
 
@@ -18,7 +18,7 @@ This document separates implemented behavior, observed verification, and propose
 | ID | Work unit | Type | Status | Ready | Deps | Done when / Evidence |
 | --- | --- | --- | --- | --- | --- | --- |
 | M1 | Download-only service baseline | Milestone | Complete | No | none | Implemented service and Bash verification; container checks passed. [Detail](#m1---download-only-service-baseline). |
-| M2 | Document and prepare baseline commit | Milestone | In progress | No | M1 | Documentation agrees with code; exact commit artifacts are prepared. [Detail](#m2---document-and-prepare-baseline-commit). |
+| M2 | Document and prepare baseline commit | Milestone | Complete | No | M1 | Baseline documentation and commit preparation completed; three commits published on 2026-10-10. [Detail](#m2---document-and-prepare-baseline-commit). |
 | M3 | Published directory policy | Milestone | Not started | Yes | none | Reviewable policy defines ownership, publication, and recursive checks. [Detail](#m3---published-directory-policy). |
 | M4 | EPICS IOC monitoring design | Milestone | Not started | Yes | none | Reviewable design defines real TFTP probes, PVs, alarms, and failure tests. [Detail](#m4---epics-ioc-monitoring-design). |
 | M5 | Concurrent boot capacity plan | Milestone | Not started | Yes | none | Approved measurement criteria and repeatable real-client load procedure. [Detail](#m5---concurrent-boot-capacity-plan). |
@@ -92,14 +92,14 @@ The steps below describe delivered scope; they do not assert retrospective plan 
 
 ##### Closure Evidence
 
-Implemented artifacts: configure/RELEASE, configure/RULES_INSTALL, systemd templates, bin/check-service.bash, tests/*.bash, CI workflows, and operator documentation. Original suite stdout was not archived. The 2026-10-10 peer run retains commands.log, container logs, and cleanup.log in its private /tmp/atftp-network.<run_id> directory, as described in tests/README.md. These temporary logs are local evidence, not repository artifacts. Temporary containers and the network were removed. No production acceptance or capacity claim is included.
+Implemented artifacts: configure/RELEASE, configure/RULES_INSTALL, systemd templates, bin/check-service.bash, tests/*.bash, CI workflows, and operator documentation. Original suite stdout was not archived. The 2026-10-10 peer run retains commands.log, container logs, and cleanup.log in its private /tmp/atftp-network.<run_id> directory, as described in docs/VERIFICATION.md. These temporary logs are local evidence, not repository artifacts. Temporary containers and the network were removed. No production acceptance or capacity claim is included.
 
 #### M2 - Document and prepare baseline commit
 
 Origin: dae25fe / M2
 Identity History: none
 GitHub Issue: none
-Status: In progress
+Status: Complete
 
 ##### Summary
 
@@ -128,7 +128,7 @@ Plan Acceptance: none
 Implementation Authorization: none
 Superseded Plan Artifacts: none
 
-Documentation consolidation is authorized on 2026-10-09. The remaining implementation plan requires separate acceptance.
+Documentation consolidation was authorized on 2026-10-09; commit preparation and execution were authorized on 2026-10-10. These steps record delivered scope without asserting retrospective plan acceptance.
 
 1. Record completed behavior and observed tests.
 2. Update documentation links and describe the verification boundary.
@@ -146,11 +146,11 @@ Documentation consolidation is authorized on 2026-10-09. The remaining implement
 | Label | Observed At | Environment | Result | Evidence |
 | --- | --- | --- | --- | --- |
 | T1 | 2026-10-09 | Repository | Pass | Local documentation targets exist; five work rows match five details; current behavior matches configure/RULES_INSTALL, configure/RULES_SYSTEMD, Bash checks, and observed container results. Bash syntax, ShellCheck, and git diff --check exit zero. |
-| T2 | Not run | Repository | Pending | Commit artifacts require preparation. |
+| T2 | 2026-10-10 | Repository and origin/master | Pass | Prepared message and staging files passed Bash syntax, ShellCheck, explicit 36-file scope, and staged whitespace checks. Commits d1a4981, 6db0cc8, and b1f4d13 were inspected and pushed; local and upstream HEAD matched b1f4d13. |
 
 ##### Closure Evidence
 
-None. No commit has been executed.
+Completed 2026-10-10. Version commit d1a4981, service/test commit 6db0cc8, and documentation commit b1f4d13 contain the baseline. The worktree was clean and origin/master matched after push. Preparation artifacts remain local under ignored work/.
 
 #### M3 - Published directory policy
 
