@@ -22,6 +22,8 @@ This document separates implemented behavior, observed verification, and propose
 | M3 | Published directory policy | Milestone | Not started | Yes | none | Reviewable policy defines ownership, publication, and recursive checks. [Detail](#m3---published-directory-policy). |
 | M4 | EPICS IOC monitoring design | Milestone | Not started | Yes | none | Reviewable design defines real TFTP probes, PVs, alarms, and failure tests. [Detail](#m4---epics-ioc-monitoring-design). |
 | M5 | Concurrent boot capacity plan | Milestone | Not started | Yes | none | Approved measurement criteria and repeatable real-client load procedure. [Detail](#m5---concurrent-boot-capacity-plan). |
+| G1 | Representative device information and access | External gate | Open | No | none | Device owners provide boot information and access to representative BLM and PSC devices. [Detail](#g1---representative-device-information-and-access). |
+| M6 | U-Boot device acceptance | Milestone | Blocked | No | G1 | Actual downloads, boot, and recovery meet device-specific criteria. [Detail](#m6---u-boot-device-acceptance). |
 
 ### Decisions
 
@@ -321,6 +323,74 @@ The steps below are proposals; listing them does not authorize implementation.
 | T1 | Not run | Measurement plan | Pending | Workload and evidence definitions require review. |
 | T2 | Not run | Measurement plan | Pending | Overload and recovery procedure requires review. |
 | T3 | Not run | Measurement plan | Pending | Deployment acceptance boundary requires review; no capacity claim is made. |
+
+##### Closure Evidence
+
+None.
+
+#### G1 - Representative device information and access
+
+Origin: dae25fe / G1
+Identity History: none
+Status: Open
+
+Condition: Obtain representative BLM and PSC board identities, U-Boot versions and environments, requested file paths and sizes, boot usage, device counts, timing requirements, publication ownership, and recovery procedures.
+
+Responsible party: Device owners and operations staff.
+Affected work: M6. Device-specific inputs also inform M3 and M5 without preventing their generic preparation.
+Completion criterion: Required information is recorded and representative devices are available for acceptance tests.
+Observed result: Not received.
+Closure evidence: None.
+
+#### M6 - U-Boot device acceptance
+
+Origin: dae25fe / M6
+Identity History: none
+GitHub Issue: none
+Status: Blocked
+
+##### Summary
+
+Verify download-only TFTP service with representative control devices running U-Boot.
+
+##### Scope
+
+Device-specific request paths, complete boot file sets, transfer options, content validation, boot, and previous-image recovery.
+
+Out of scope: Treating atftp client tests or container results as actual-device acceptance; production concurrent-load execution.
+
+##### Completion Criteria
+
+- Record the board and U-Boot build for each tested device family.
+- Observe complete image downloads and successful boot using the deployed file paths.
+- Observe previous-image recovery and record transfer options and completion times against agreed criteria.
+
+##### Dependencies And Decisions
+
+G1; resume as Not started. Record requested work on 2026-10-10; device information and access remain external prerequisites.
+
+##### Implementation Plan
+
+Plan Status: draft
+Plan Acceptance: none
+Implementation Authorization: none
+Superseded Plan Artifacts: none
+
+1. Review device information and agree on device-specific acceptance criteria.
+2. Test actual downloads, boot, and previous-image recovery on representative devices.
+3. Record observed results and any remaining compatibility limits.
+
+##### Test Plan
+
+| Label | Layer | Method | Environment | Expected Result |
+| --- | --- | --- | --- | --- |
+| T1 | Device acceptance | Download complete images, validate content where supported, boot, and recover the previous image. | Representative BLM and PSC devices | Paths, content, boot, recovery, and timing meet agreed criteria. |
+
+##### Verification Results
+
+| Label | Observed At | Environment | Result | Evidence |
+| --- | --- | --- | --- | --- |
+| T1 | Not run | Representative BLM and PSC devices | Pending | Device information and access are required. |
 
 ##### Closure Evidence
 
